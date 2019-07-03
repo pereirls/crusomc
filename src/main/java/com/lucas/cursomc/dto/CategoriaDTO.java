@@ -1,16 +1,16 @@
 package com.lucas.cursomc.dto;
 
 import com.lucas.cursomc.domain.Categoria;
-import com.lucas.cursomc.domain.Produto;
+import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.ManyToMany;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CategoriaDTO implements Serializable {
 
     private Integer id;
+    @NotEmpty(message="Preenchimento obrigatório")
+    @Length(min=5, max=80, message="O tamanho deve ser entre 5 e 80 caracteres")
     private String nome;
 
     public CategoriaDTO(){
