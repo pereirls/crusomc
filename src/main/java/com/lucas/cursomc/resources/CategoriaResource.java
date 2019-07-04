@@ -1,6 +1,7 @@
 package com.lucas.cursomc.resources;
 
 import com.lucas.cursomc.domain.Categoria;
+import com.lucas.cursomc.domain.Cliente;
 import com.lucas.cursomc.dto.CategoriaDTO;
 import com.lucas.cursomc.services.CategoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class CategoriaResource {
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<Void> insert(@Valid @RequestBody CategoriaDTO objDTO) {
 
-		Categoria obj = fromDTO(objDTO);
+		Categoria obj = categoriaService.fromDTO(objDTO);
 		obj = categoriaService.insert(obj);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
 				.path("/{id}").buildAndExpand(objDTO.getId()).toUri();
@@ -38,7 +39,8 @@ public class CategoriaResource {
 	}
 
 	@RequestMapping(value="/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<Void> update(@RequestBody Categoria obj, @PathVariable Integer id){
+	public ResponseEntity<Void> update(@RequestBody CategoriaDTO objDTO, @PathVariable Integer id){
+		Categoria obj = categoriaService.fromDTO(objDTO);
 		obj.setId(id);
 		obj = categoriaService.update(obj);
 		return ResponseEntity.noContent().build();
@@ -65,9 +67,5 @@ public class CategoriaResource {
 		Page<Categoria> list = categoriaService.findPage(page, linesPerPage, orderBy, direction);
 		Page<CategoriaDTO> listDto = list.map(obj ->  new CategoriaDTO(obj));
 		return ResponseEntity.ok().body(listDto);
-	}
-
-	public Categoria fromDTO(CategoriaDTO objDTO) {
-		return new Categoria(objDTO.getId(), objDTO.getNome());
 	}
 }
