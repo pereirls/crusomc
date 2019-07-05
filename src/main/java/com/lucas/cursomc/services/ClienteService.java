@@ -1,11 +1,15 @@
 package com.lucas.cursomc.services;
 
-import java.util.List;
-import java.util.Optional;
-
-import com.lucas.cursomc.dto.CategoriaDTO;
-import com.lucas.cursomc.dto.ClienteDTO;
+import com.lucas.cursomc.domain.Cidade;
+import com.lucas.cursomc.domain.Cliente;
+import com.lucas.cursomc.domain.Endereco;
+import com.lucas.cursomc.domain.enuns.TipoCliente;
+import com.lucas.cursomc.dto.ClienteNewDTO;
+import com.lucas.cursomc.repositories.CidadeRepository;
+import com.lucas.cursomc.repositories.ClienteRepository;
+import com.lucas.cursomc.repositories.EnderecoRepository;
 import com.lucas.cursomc.services.exception.DataIntegrityException;
+import com.lucas.cursomc.services.exception.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -13,25 +17,33 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.lucas.cursomc.domain.Categoria;
-import com.lucas.cursomc.domain.Cliente;
-import com.lucas.cursomc.repositories.ClienteRepository;
-import com.lucas.cursomc.services.exception.ObjectNotFoundException;
+import javax.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ClienteService {
 	
 	@Autowired	
 	private ClienteRepository repo;
+
+	@Autowired
+	private CidadeRepository cidadeRepository;
+
+	@Autowired
+	private EnderecoRepository enderecoRepository;
 	
 	public Cliente find(Integer id) {
 		Optional<Cliente> obj = repo.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: "+ Cliente.class.getName()));
 	}
 
+	@Transactional
 	public Cliente insert(Cliente obj) {
 		obj.setId(null);
-		return repo.save(obj);
+		obj = repo.save(obj);
+		enderecoRepository.saveAll(obj.getEnderecos());
+		return  obj;
 
 	}
 
@@ -54,7 +66,7 @@ public class ClienteService {
 		try{
 			repo.deleteById(id);
 		} catch (DataIntegrityViolationException e) {
-			throw new DataIntegrityException("Não é possível excluir porque há entidades relacionadas!");
+			throw new DataIntegrityException("Não é possível excluir porque há entidades relacionadas! ");
 		}
 	}
 
@@ -69,8 +81,20 @@ public class ClienteService {
 		return repo.findAll(pageRequest);
 	}
 
-	public Cliente fromDTO(ClienteDTO objDTO) {
+	public Cliente fromDTO(ClienteNewDTO objDTO) {
 
-		return new Cliente(objDTO.getId(), objDTO.getNome(), objDTO.getEmail(),null, null);
+		Cliente cli = new Cliente(null, objDTO.getNome(), objDTO.getEmail(), objDTO.getCpfOuCnpj(), TipoCliente.toEnum(objDTO.getTipoCliente()));
+		Optional<Cidade> cid = cidadeRepository.findById(objDTO.getIdCidade());
+		Endereco end = new Endereco(null, objDTO.getLogradouro(), objDTO.getNumero(), objDTO.getComplemento(), objDTO.getBairro(), objDTO.getCep(), cli, cid.get());
+		cli.getEnderecos().add(end);
+		cli.getTelefones().add(objDTO.getTelefone1());
+		if(objDTO.getTelefone2()!= null) {
+			cli.getTelefones().add(objDTO.getTelefone2());
+		}
+		if(objDTO.getTelefone3()!= null) {
+			cli.getTelefones().add(objDTO.getTelefone3());
+		}
+
+		return cli;
 	}
 }
