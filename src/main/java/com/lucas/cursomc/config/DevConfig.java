@@ -1,6 +1,8 @@
 package com.lucas.cursomc.config;
 
 import com.lucas.cursomc.services.DbService;
+import com.lucas.cursomc.services.EmailService;
+import com.lucas.cursomc.services.SmtpEmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,5 +27,10 @@ public class DevConfig {
 
         dbService.instantiateDastaBase();
         return true;
+    }
+
+    @Bean
+    public EmailService emailService() {
+        return new SmtpEmailService();
     }
 }
