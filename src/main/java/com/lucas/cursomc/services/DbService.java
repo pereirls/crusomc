@@ -23,6 +23,7 @@ import com.lucas.cursomc.repositories.PagamentoRepository;
 import com.lucas.cursomc.repositories.PedidoRepository;
 import com.lucas.cursomc.repositories.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -57,6 +58,9 @@ public class DbService {
 
     @Autowired
     private ItemPedidoRepository itemPedidoRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder encoder;
 
     public void instantiateDastaBase() throws Exception {
         Categoria cat1 = new Categoria(null, "Informática");
@@ -111,7 +115,7 @@ public class DbService {
         cidadeRepository.saveAll(Arrays.asList(c1, c2, c3));
 
         Cliente cli1 = new Cliente(null, "Maria Silva", "lspereira02@gmail.com",
-                "36378912377", TipoCliente.PESSOA_FISICA);
+                "36378912377", TipoCliente.PESSOA_FISICA,encoder.encode("123"));
         cli1.getTelefones().addAll(Arrays.asList("27363323","93838393"));
 
         Endereco e1 = new Endereco(null, "Rua Flores", "300", "Apto 303", "Jardim", "38220834", cli1, c1);

@@ -4,6 +4,7 @@ import com.lucas.cursomc.domain.Cidade;
 import com.lucas.cursomc.domain.Cliente;
 import com.lucas.cursomc.domain.Endereco;
 import com.lucas.cursomc.domain.enuns.TipoCliente;
+import com.lucas.cursomc.dto.ClienteDTO;
 import com.lucas.cursomc.dto.ClienteNewDTO;
 import com.lucas.cursomc.repositories.CidadeRepository;
 import com.lucas.cursomc.repositories.ClienteRepository;
@@ -15,6 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -32,6 +34,9 @@ public class ClienteService {
 
 	@Autowired
 	private EnderecoRepository enderecoRepository;
+
+	@Autowired
+	private BCryptPasswordEncoder encoder;
 	
 	public Cliente find(Integer id) {
 		Optional<Cliente> obj = repo.findById(id);
@@ -81,9 +86,13 @@ public class ClienteService {
 		return repo.findAll(pageRequest);
 	}
 
+	public Cliente froDTO(ClienteDTO objDTO) {
+		return new Cliente(null, objDTO.getNome(), objDTO.getEmail(), null, null,null);
+	}
+
 	public Cliente fromDTO(ClienteNewDTO objDTO) {
 
-		Cliente cli = new Cliente(null, objDTO.getNome(), objDTO.getEmail(), objDTO.getCpfOuCnpj(), TipoCliente.toEnum(objDTO.getTipoCliente()));
+		Cliente cli = new Cliente(null, objDTO.getNome(), objDTO.getEmail(), objDTO.getCpfOuCnpj(), TipoCliente.toEnum(objDTO.getTipoCliente()),encoder.encode(objDTO.getSenha()));
 		Optional<Cidade> cid = cidadeRepository.findById(objDTO.getIdCidade());
 		Endereco end = new Endereco(null, objDTO.getLogradouro(), objDTO.getNumero(), objDTO.getComplemento(), objDTO.getBairro(), objDTO.getCep(), cli, cid.get());
 		cli.getEnderecos().add(end);
