@@ -11,7 +11,6 @@ import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import javax.security.auth.login.Configuration;
 import java.util.Date;
 
 public abstract class AbstractEmailService implements EmailService {
