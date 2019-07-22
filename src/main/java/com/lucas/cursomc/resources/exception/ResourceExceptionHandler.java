@@ -2,6 +2,7 @@ package com.lucas.cursomc.resources.exception;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.lucas.cursomc.services.exception.AuthorizationException;
 import com.lucas.cursomc.services.exception.DataIntegrityException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,4 +43,11 @@ public class ResourceExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
 	}
 
+	@ExceptionHandler(AuthorizationException.class)
+	public ResponseEntity<StandartError> authorization(AuthorizationException e, HttpServletRequest request) {
+
+		StandartError err = new StandartError(HttpStatus.FORBIDDEN.value(), e.getMessage(), System.currentTimeMillis());
+
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(err);
+	}
 }

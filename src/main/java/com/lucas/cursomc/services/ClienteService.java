@@ -1,14 +1,17 @@
 package com.lucas.cursomc.services;
 
+import com.lucas.cursomc.Security.UserSS;
 import com.lucas.cursomc.domain.Cidade;
 import com.lucas.cursomc.domain.Cliente;
 import com.lucas.cursomc.domain.Endereco;
+import com.lucas.cursomc.domain.enuns.Perfil;
 import com.lucas.cursomc.domain.enuns.TipoCliente;
 import com.lucas.cursomc.dto.ClienteDTO;
 import com.lucas.cursomc.dto.ClienteNewDTO;
 import com.lucas.cursomc.repositories.CidadeRepository;
 import com.lucas.cursomc.repositories.ClienteRepository;
 import com.lucas.cursomc.repositories.EnderecoRepository;
+import com.lucas.cursomc.services.exception.AuthorizationException;
 import com.lucas.cursomc.services.exception.DataIntegrityException;
 import com.lucas.cursomc.services.exception.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +42,10 @@ public class ClienteService {
 	private BCryptPasswordEncoder encoder;
 	
 	public Cliente find(Integer id) {
+		UserSS usuarioLogado = UserService.authenticated();
+		if(usuarioLogado==null || !usuarioLogado.hasRole(Perfil.ADMIN) && !id.equals(usuarioLogado.getId())) {
+			throw new AuthorizationException("Acesso negado");
+		}
 		Optional<Cliente> obj = repo.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: "+ Cliente.class.getName()));
 	}
