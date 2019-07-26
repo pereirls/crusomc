@@ -32,8 +32,8 @@ import java.util.Optional;
 
 @Service
 public class ClienteService {
-	
-	@Autowired	
+
+	@Autowired
 	private ClienteRepository repo;
 
 	@Autowired
@@ -56,7 +56,7 @@ public class ClienteService {
 
 	@Value("${img.profile.size}")
 	private Integer size;
-	
+
 	public Cliente find(Integer id) {
 		UserSS usuarioLogado = UserService.authenticated();
 		if(usuarioLogado==null || !usuarioLogado.hasRole(Perfil.ADMIN) && !id.equals(usuarioLogado.getId())) {
@@ -98,9 +98,20 @@ public class ClienteService {
 	}
 
 	public List<Cliente> findAll(){
-
 		return repo.findAll();
+	}
 
+	public Cliente findByEmail(String email) {
+		UserSS usuarioLogado = UserService.authenticated();
+		if(usuarioLogado==null || !usuarioLogado.hasRole(Perfil.ADMIN) && !email.equals(usuarioLogado.getUsername())) {
+			throw new AuthorizationException("Acesso negado");
+		}
+		Cliente obj = repo.findByEmail(email);
+		if(obj == null) {
+			throw  new ObjectNotFoundException("Objeto não encontrado! Id: " + usuarioLogado.getId() + ", Tipo: "+ Cliente.class.getName());
+		}
+
+		return obj;
 	}
 
 	public Page<Cliente> findPage(Integer page, Integer linesPerPage, String orderBy, String direction) {
